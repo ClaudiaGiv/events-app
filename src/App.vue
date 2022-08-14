@@ -89,17 +89,17 @@ export default {
     colo: "grey",
   }),
   mounted() {
-    const navbar = document.getElementById("nav-bar");
+    // const navbar = document.getElementById("nav-bar");
     window.addEventListener("scroll", () => {
       if (window.scrollY > 20) {
         this.color = "whitesmoke";
         this.colo = "grey";
-        navbar.classList.add("scale-in-center");
+        // navbar.classList.add("scale-in-center");
       } else {
         // this.color = "transparent";
         // this.colo = "white";
-        navbar.classList.remove("scale-in-center");
-        navbar.classList.add("scale-out-center");
+        // navbar.classList.remove("scale-in-center");
+        // navbar.classList.add("scale-out-center");
       }
     });
   },

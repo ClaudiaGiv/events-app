@@ -1,5 +1,5 @@
 <template>
-  <v-dialog @click:outside="closeDialog" :value="dialog" max-width="450px">
+<!--  <v-dialog @click:outside="closeDialog" :value="dialog" max-width="450px">-->
     <v-card
         @drop.prevent="onDrop($event)"
         @dragover.prevent="dragover = true"
@@ -47,16 +47,16 @@
       <v-card-actions>
         <v-spacer></v-spacer>
 
-        <v-btn @click="closeDialog" icon>
-          <v-icon id="close-button">mdi-close</v-icon>
-        </v-btn>
+<!--        <v-btn @click="closeDialog" icon>-->
+<!--          <v-icon id="close-button">mdi-close</v-icon>-->
+<!--        </v-btn>-->
 
         <v-btn icon @click.stop="submit">
           <v-icon id="upload-button">mdi-upload</v-icon>
         </v-btn>
       </v-card-actions>
     </v-card>
-  </v-dialog>
+<!--  </v-dialog>-->
 
 </template>
 
@@ -64,10 +64,10 @@
 export default {
   name: "upload",
   props: {
-    dialog: {
-      type: Boolean,
-      required: true
-    },
+    // dialog: {
+    //   type: Boolean,
+    //   required: true
+    // },
     multiple: {
       type: Boolean,
       default: false
@@ -80,12 +80,12 @@ export default {
     };
   },
   methods: {
-    closeDialog() {
-      // Remove all the uploaded files
-      this.uploadedFiles = [];
-      // Close the dialog box
-      this.$emit("update:dialog", false);
-    },
+    // closeDialog() {
+    //   // Remove all the uploaded files
+    //   this.uploadedFiles = [];
+    //   // Close the dialog box
+    //   this.$emit("update:dialog", false);
+    // },
     removeFile(fileName) {
       // Find the index of the
       const index = this.uploadedFiles.findIndex(
@@ -122,7 +122,7 @@ export default {
         // Send uploaded files to parent component
         this.$emit("filesUploaded", this.uploadedFiles);
         // Close the dialog box
-        this.closeDialog();
+        // this.closeDialog();
       }
     }
   }
