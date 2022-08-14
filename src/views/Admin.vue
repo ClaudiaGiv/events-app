@@ -86,7 +86,7 @@
                       md="4"
                   >
                     <v-text-field
-                        v-model="editedItem.category"
+                        v-model="editedItem.category.name"
                         label="Categoria"
                     ></v-text-field>
                   </v-col>
@@ -175,10 +175,12 @@
 <script>
 import { db } from '../firebase'
 import {doc, query, where, collection, getDocs, getDoc} from "firebase/firestore";
+import store from "@/store";
 export default {
   name: "Admin",
   data: () => ({
     dialog: false,
+    user: {},
     images: [],
     imageRules: [(v) => v.length > 0 || "jpg/img"],
     dialogDelete: false,
@@ -235,7 +237,9 @@ export default {
   methods: {
     async initialize() {
       // this.events;
-      const docRef = doc(db, "User", 'PiorIKUd1c1j0eTvQ8og');
+      this.user = store.getters.user
+      this.events = this.user.events
+     /* const docRef = doc(db, "User", 'PiorIKUd1c1j0eTvQ8og');
       const docSnap = await getDoc(docRef);
       console.log(docSnap.data())
       const q = query(collection(db, "Event"), where("organizer", "==", docRef));
@@ -250,7 +254,7 @@ export default {
         // doc.data() is never undefined for query doc snapshots
         console.log(doc.id, " => ", doc.data());
       });
-      console.log(this.events)
+      console.log(this.events)*/
       // const collRef = collection(db, "Event")
       // const docs = await getDocs(collRef)
       // docs.forEach((doc) => {
