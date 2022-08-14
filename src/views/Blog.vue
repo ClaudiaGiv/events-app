@@ -3,19 +3,19 @@
     <p class="font-2 weight-600 text-center">Articole</p>
     <v-row no-gutters>
       <v-col cols="12" v-for="i in specials.team" :key="i[i+1]" xl="4" lg="4">
-        <specialCardVue :info="i"/>
+        <specialCardBlogVue :info="i" />
       </v-col>
     </v-row>
   </v-container>
 </template>
 
 <script>
-import specialCardVue from '../components/Home/utilities/special.card.vue'
+import specialCardBlogVue from '../components/Home/utilities/special.card.blog.vue'
 
 export default {
   name: "Blog",
   components: {
-    specialCardVue
+    specialCardBlogVue
   },
   data() {
     return {
