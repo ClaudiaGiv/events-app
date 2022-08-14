@@ -26,3 +26,7 @@ export async function setLoggedInUser(user) {
     console.log(auth.currentUser);
     console.log("----", user)
 }
+
+export function addFavoriteEvent(event){
+
+}

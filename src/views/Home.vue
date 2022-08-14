@@ -13,7 +13,7 @@ import heroHomeVue from '../components/Home/hero.home.vue'
 import specialsHomeVue from '../components/Home/specials.home.vue'
 import { db} from '../firebase'
 import { doc, getDoc, collection, getDocs } from "firebase/firestore";
-
+import {getEventsBy} from '../services/event-service'
 
 export default {
   name: 'Home',

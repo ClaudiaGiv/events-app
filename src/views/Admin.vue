@@ -173,7 +173,7 @@
 </template>
 
 <script>
-import { db} from '../firebase'
+import { db } from '../firebase'
 import {doc, query, where, collection, getDocs, getDoc} from "firebase/firestore";
 export default {
   name: "Admin",
