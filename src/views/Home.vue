@@ -14,6 +14,9 @@ import specialsHomeVue from '../components/Home/specials.home.vue'
 import { db} from '../firebase'
 import { doc, getDoc, collection, getDocs } from "firebase/firestore";
 import {getEventsBy} from '../services/event-service'
+import {createEvent} from '../services/event-service'
+import {deleteEvent} from '../services/event-service'
+import {getAllCategories} from '../services/event-service'
 
 export default {
   name: 'Home',
@@ -51,6 +54,24 @@ export default {
     //       console.log("Error getting documents: ", error);
     //     });
 
+    //getEventsBy('Cluj-Napoca','cb8x41sHADYBWWCxztK0','2022-08-16' )
+
+    // const event ={
+    //   category: {
+    //     id: 'cb8x41sHADYBWWCxztK0',
+    //     name: 'Arta'
+    //   },
+    //   date: '2022-08-16',
+    //   description: 'asdasdass',
+    //   location: 'Cluj-Napoca',
+    //   name: 'nebunie'
+    // }
+    //
+    // createEvent(event)
+
+    //deleteEvent('assd')
+
+    //getAllCategories()
   }
 }
 </script>
