@@ -1,6 +1,6 @@
 import store from "@/store";
 import {auth, db} from "../firebase";
-import {query, where, collection, getDocs, getDoc} from "firebase/firestore";
+import {query, where, collection, getDocs, getDoc, doc, arrayUnion, updateDoc} from "firebase/firestore";
 
 async function getData(doc) {
     return (await getDoc(doc)).data()
@@ -27,6 +27,10 @@ export async function setLoggedInUser(authUser) {
     console.log(store.getters.user)
 }
 
-export function addFavoriteEvent(event) {
-
+export async function addFavoriteEvent(eventId) {
+    const user = store.getters.user
+    const userRef = doc(db, "User", user.id);
+    await updateDoc(userRef, {
+        favoriteEvents: arrayUnion(eventId)
+    });
 }

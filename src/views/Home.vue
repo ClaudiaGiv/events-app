@@ -17,6 +17,9 @@ import {getEventsBy} from '../services/event-service'
 import {createEvent} from '../services/event-service'
 import {deleteEvent} from '../services/event-service'
 import {getAllCategories} from '../services/event-service'
+import {createCategory} from '../services/event-service'
+import {deleteCategory} from '../services/event-service'
+import {addFavoriteEvent} from '../services/user-service'
 
 export default {
   name: 'Home',
@@ -72,6 +75,15 @@ export default {
     //deleteEvent('assd')
 
     //getAllCategories()
+
+    //addFavoriteEvent('dnaAsMggpnICXMQaFLft')
+
+    // const category ={
+    //   name: 'nebunii'
+    // }
+    // createCategory(category)
+
+    //deleteCategory('XQAAPmkKkuYTvz1W9CFz')
   }
 }
 </script>

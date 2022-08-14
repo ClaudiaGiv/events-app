@@ -73,3 +73,19 @@ export async function getAllCategories(){
     console.log(categories)
     return categories
 }
+
+export async function createCategory(category) {
+
+    const docData = {
+        name: category.name
+    }
+    console.log('CREATCATEGORY', docData)
+
+    const docRef = await addDoc(collection(db, "Category"), docData)
+    console.log(docRef)
+    return docRef
+}
+
+export async function deleteCategory(categoryId) {
+    await deleteDoc(doc(db, "Category", categoryId));
+}
