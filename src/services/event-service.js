@@ -16,7 +16,8 @@ export async function createEvent(event) {
         description: event.description,
         location: event.location,
         name: event.name,
-        organizer: doc(db, "User", store.getters.user.id)};
+        organizer: doc(db, "User", store.getters.user.id)
+    };
     console.log('CREATEEVENT', docData)
 
     const docRef = await addDoc(collection(db, "Event"), docData)
@@ -24,9 +25,6 @@ export async function createEvent(event) {
     return docRef
 }
 
-export function updateEvent(event) {
-
-}
 
 export async function deleteEvent(eventId) {
     await deleteDoc(doc(db, "Event", eventId));
@@ -62,13 +60,13 @@ export async function getEventsBy(location, category, date) {
     return events
 }
 
-export async function getAllCategories(){
+export async function getAllCategories() {
     const q = query(collection(db, "Category"))
     const querySnapshot = await getDocs(q);
-    let categories=[]
+    let categories = []
     querySnapshot.forEach((doc) => {
         console.log(doc.id, " => ", doc.data());
-        categories.push(doc.data())
+        categories.push({...doc.data(), id: doc.id})
     });
     console.log(categories)
     return categories

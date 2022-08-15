@@ -15,13 +15,19 @@ export async function setLoggedInUser(authUser) {
         console.log(doc.id, " => ", doc.data());
         user = {...doc.data(), id: doc.id}
     })
-    user.events = await Promise.all(user.events.map(async (e) => {
-        let ev = await getData(e)
-        let category = await getData(ev.category)
-        const options = {year: 'numeric', month: 'long', day: 'numeric'};
-        let date = (new Date(ev.date.seconds * 1000)).toLocaleDateString("en-GB", options)
-        return {...ev, category: {name: category.name, id: ev.category.id}, date}
-    }))
+    if (user.events.length > 0) {
+        user.events = await Promise.all(user.events.map(async (e) => {
+            let ev = await getData(e)
+            console.log(ev)
+            if (ev) {
+                let category = await getData(ev.category)
+                const options = {year: 'numeric', month: 'long', day: 'numeric'};
+                // let date = (new Date(ev.date.seconds * 1000)).toLocaleDateString("en-GB", options)
+                let date = (new Date(ev.date.seconds * 1000)).toISOString().substr(0, 10)
+                return {...ev, category: {name: category.name, id: ev.category.id}, date, id: e.id}
+            }
+        }))
+    }
     console.log(user.events)
     store.commit("SET_USER", user);
     console.log(store.getters.user)

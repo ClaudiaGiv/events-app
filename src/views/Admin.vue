@@ -42,8 +42,8 @@
                 <v-row>
                   <v-col
                       cols="12"
-                      sm="6"
-                      md="4"
+                      sm="12"
+                      md="12"
                   >
                     <v-text-field
                         v-model="editedItem.name"
@@ -52,23 +52,43 @@
                   </v-col>
                   <v-col
                       cols="12"
-                      sm="6"
-                      md="4"
+                      sm="12"
+                      md="12"
                   >
-                    <v-text-field
+                    <v-textarea
                         v-model="editedItem.description"
+                        rows="3"
                         label="Descriere"
-                    ></v-text-field>
+                    ></v-textarea>
                   </v-col>
                   <v-col
                       cols="12"
                       sm="6"
                       md="4"
                   >
-                    <v-text-field
-                        v-model="editedItem.date"
-                        label="Data"
-                    ></v-text-field>
+                    <v-menu
+                        ref="dateMenu"
+                        v-model="dateMenu"
+                        :close-on-content-click="false"
+                        :return-value.sync="editedItem.date"
+                        lazy
+                        transition="scale-transition"
+                        offset-y
+                    >
+                      <template v-slot:activator="{ on }">
+                        <v-text-field
+                            v-model="editedItem.date"
+                            label="Data"
+                            readonly
+                            v-on="on"
+                        ></v-text-field>
+                      </template>
+                      <v-date-picker v-model="editedItem.date" no-title scrollable >
+                        <v-spacer></v-spacer>
+                        <v-btn color="primary" @click="dateMenu = false">Cancel</v-btn>
+                        <v-btn color="primary" @click="$refs.dateMenu.save(editedItem.date)">OK</v-btn>
+                      </v-date-picker>
+                    </v-menu>
                   </v-col>
                   <v-col
                       cols="12"
@@ -85,10 +105,14 @@
                       sm="6"
                       md="4"
                   >
-                    <v-text-field
-                        v-model="editedItem.category.name"
+                    <v-select
+                        :items="categories"
+                        item-text="name"
+                        return-object
+                        v-model="editedItem.category"
                         label="Categoria"
-                    ></v-text-field>
+                    ></v-select>
+
                   </v-col>
 
                 </v-row>
@@ -132,7 +156,7 @@
         </v-dialog>
         <v-dialog v-model="dialogDelete" max-width="500px">
           <v-card>
-            <v-card-title class="text-h5">Esti sigur ac vrei sa stergi acest eveniment?</v-card-title>
+            <v-card-title class="text-md-h6">Esti sigur ca vrei sa stergi acest eveniment?</v-card-title>
             <v-card-actions>
               <v-spacer></v-spacer>
               <v-btn color="blue darken-1" text @click="closeDelete">Anuleaza</v-btn>
@@ -173,15 +197,21 @@
 </template>
 
 <script>
-import { db } from '../firebase'
+import {db, storage} from '../firebase'
+import {ref, uploadBytes} from 'firebase/storage'
 import {doc, query, where, collection, getDocs, getDoc} from "firebase/firestore";
 import store from "@/store";
+import * as eventService from '../services/event-service'
+
 export default {
   name: "Admin",
   data: () => ({
     dialog: false,
     user: {},
+    deletedEventId: '',
+    dateMenu: false,
     images: [],
+    categories: [],
     imageRules: [(v) => v.length > 0 || "jpg/img"],
     dialogDelete: false,
     headers: [
@@ -194,7 +224,7 @@ export default {
       {text: 'Description', value: 'description'},
       {text: 'Date', value: 'date'},
       {text: 'Location', value: 'location'},
-      {text: 'Category', value: 'category'},
+      {text: 'Category', value: 'category.name'},
       {text: 'Actions', value: 'actions', sortable: false},
     ],
     events: [],
@@ -205,6 +235,7 @@ export default {
       date: '',
       location: '',
       category: '',
+      id: ''
     },
     defaultItem: {
       name: '',
@@ -212,15 +243,14 @@ export default {
       date: '',
       location: '',
       category: '',
+      id: ''
     },
   }),
-
   computed: {
     formTitle() {
       return this.editedIndex === -1 ? 'Eveniment nou' : 'Editeaza detaliile evenimentului'
     },
   },
-
   watch: {
     dialog(val) {
       val || this.close()
@@ -228,126 +258,68 @@ export default {
     dialogDelete(val) {
       val || this.closeDelete()
     },
+    images(val) {
+      console.log('----images-----', val)
+    },
+    editedItem(val) {
+      console.log('item category')
+      console.log(val)
+    }
   },
-
   async created() {
     await this.initialize()
   },
-
   methods: {
     async initialize() {
-      // this.events;
       this.user = store.getters.user
       this.events = this.user.events
-     /* const docRef = doc(db, "User", 'PiorIKUd1c1j0eTvQ8og');
-      const docSnap = await getDoc(docRef);
-      console.log(docSnap.data())
-      const q = query(collection(db, "Event"), where("organizer", "==", docRef));
-      // const q = query(collection(db, "Event"), where("location", "==", 'Viena'));
+      this.categories = await eventService.getAllCategories()
+      console.log('this.categories')
+      console.log(this.events)
+      /* const docRef = doc(db, "User", 'PiorIKUd1c1j0eTvQ8og');
+       const docSnap = await getDoc(docRef);
+       console.log(docSnap.data())
+       const q = query(collection(db, "Event"), where("organizer", "==", docRef));
+       // const q = query(collection(db, "Event"), where("location", "==", 'Viena'));
 
-      const querySnapshot = await getDocs(q);
-      console.log (querySnapshot)
-      querySnapshot.forEach((doc) => {
-        console.log(doc.id, " => ", doc.data());
-        this.events.push(doc.data())
-        console.log(this.events)
-        // doc.data() is never undefined for query doc snapshots
-        console.log(doc.id, " => ", doc.data());
-      });
-      console.log(this.events)*/
+       const querySnapshot = await getDocs(q);
+       console.log (querySnapshot)
+       querySnapshot.forEach((doc) => {
+         console.log(doc.id, " => ", doc.data());
+         this.events.push(doc.data())
+         console.log(this.events)
+         // doc.data() is never undefined for query doc snapshots
+         console.log(doc.id, " => ", doc.data());
+       });
+       console.log(this.events)*/
       // const collRef = collection(db, "Event")
       // const docs = await getDocs(collRef)
       // docs.forEach((doc) => {
       //   console.log(doc.data());
       // });
-      this.events1 = [
-        {
-          name: 'Frozen Yogurt',
-          calories: 159,
-          fat: 6.0,
-          carbs: 24,
-          protein: 4.0,
-        },
-        {
-          name: 'Ice cream sandwich',
-          calories: 237,
-          fat: 9.0,
-          carbs: 37,
-          protein: 4.3,
-        },
-        {
-          name: 'Eclair',
-          calories: 262,
-          fat: 16.0,
-          carbs: 23,
-          protein: 6.0,
-        },
-        {
-          name: 'Cupcake',
-          calories: 305,
-          fat: 3.7,
-          carbs: 67,
-          protein: 4.3,
-        },
-        {
-          name: 'Gingerbread',
-          calories: 356,
-          fat: 16.0,
-          carbs: 49,
-          protein: 3.9,
-        },
-        {
-          name: 'Jelly bean',
-          calories: 375,
-          fat: 0.0,
-          carbs: 94,
-          protein: 0.0,
-        },
-        {
-          name: 'Lollipop',
-          calories: 392,
-          fat: 0.2,
-          carbs: 98,
-          protein: 0,
-        },
-        {
-          name: 'Honeycomb',
-          calories: 408,
-          fat: 3.2,
-          carbs: 87,
-          protein: 6.5,
-        },
-        {
-          name: 'Donut',
-          calories: 452,
-          fat: 25.0,
-          carbs: 51,
-          protein: 4.9,
-        },
-        {
-          name: 'KitKat',
-          calories: 518,
-          fat: 26.0,
-          carbs: 65,
-          protein: 7,
-        },
-      ]
     },
 
-    editItem(item) {
-      this.editedIndex = this.desserts.indexOf(item)
+    async editItem(item) {
+      this.editedIndex = this.events.indexOf(item)
       this.editedItem = Object.assign({}, item)
+      await eventService.createEvent(this.editedItem)
       this.dialog = true
     },
 
-    deleteItem(item) {
-      this.editedIndex = this.desserts.indexOf(item)
+    async deleteItem(item) {
+      this.editedIndex = this.events.indexOf(item)
       this.editedItem = Object.assign({}, item)
+      this.deletedEventId = item.id
       this.dialogDelete = true
     },
 
-    deleteItemConfirm() {
-      this.desserts.splice(this.editedIndex, 1)
+    async deleteItemConfirm() {
+      this.events.splice(this.editedIndex, 1)
+      console.log('----------------------this.editedItem--------------')
+      console.log(this.editedItem)
+      await eventService.deleteEvent(this.editedItem.id)
+      this.deletedEventId = ''
+
       this.closeDelete()
     },
 
@@ -367,12 +339,29 @@ export default {
       })
     },
 
-    save() {
+    async save() {
+      console.log('this.editedItem')
+      console.log(this.editedItem)
+      const eventRef = await eventService.createEvent(this.editedItem)
+
+
+      this.editedItem.id = eventRef.id
+      console.log(this.editedItem)
       if (this.editedIndex > -1) {
-        Object.assign(this.desserts[this.editedIndex], this.editedItem)
+        Object.assign(this.events[this.editedIndex], this.editedItem)
       } else {
-        this.desserts.push(this.editedItem)
+        this.events.push(this.editedItem)
       }
+
+      const storageRef = ref(storage);
+      const imagesRef = ref(storage, 'images');
+// imagesRef now points to 'images'
+
+// Child references can also take paths delimited by '/'
+      const spaceRef = ref(storage, 'images/space.jpg');
+      uploadBytes(imagesRef, this.images[0].file).then((snapshot) => {
+        console.log('Uploaded a blob or file!');
+      });
       this.close()
     },
     processUpload(event) {
@@ -380,16 +369,6 @@ export default {
     }
   },
 
-  // data() {
-  //   return {
-  //     uploadDialog: true
-  //   }
-  // },
-  // methods: {
-  //   processUpload(event) {
-  //     console.log(event)
-  //   }
-  // },
 }
 </script>
 

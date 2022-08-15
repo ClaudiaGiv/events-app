@@ -1,6 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getAuth, updateProfile } from "firebase/auth";
+import { getStorage } from "firebase/storage";
 
 // const settings = { timestampsInSnapshots: true };
 // Your web app's Firebase configuration
@@ -21,5 +22,6 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 // Initialize Cloud Firestore and get a reference to the service
 const db = getFirestore(app);
+const storage = getStorage(app);
 
-export {db, auth, updateProfile};
+export {db, auth, updateProfile, storage};
