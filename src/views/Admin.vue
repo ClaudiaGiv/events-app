@@ -1,5 +1,4 @@
 <template>
-
   <v-data-table
       :headers="headers"
       :items="events"
@@ -7,9 +6,7 @@
       class="elevation-1"
   >
     <template v-slot:top>
-      <v-toolbar
-          flat
-      >
+      <v-toolbar flat >
         <v-toolbar-title>Evenimentele mele</v-toolbar-title>
         <v-divider
             class="mx-4"
@@ -17,10 +14,7 @@
             vertical
         ></v-divider>
         <v-spacer></v-spacer>
-        <v-dialog
-            v-model="dialog"
-            max-width="500px"
-        >
+        <v-dialog v-model="dialog" max-width="500px">
           <template v-slot:activator="{ on, attrs }">
             <v-btn
                 color="primary"
@@ -28,44 +22,30 @@
                 class="mb-2"
                 v-bind="attrs"
                 v-on="on"
-            >
-              + Eveniment nou
+            > + Eveniment nou
             </v-btn>
           </template>
           <v-card>
             <v-card-title>
               <span class="text-h5">{{ formTitle }}</span>
             </v-card-title>
-
             <v-card-text>
               <v-container>
                 <v-row>
-                  <v-col
-                      cols="12"
-                      sm="12"
-                      md="12"
-                  >
+                  <v-col cols="12" sm="12" md="12">
                     <v-text-field
                         v-model="editedItem.name"
                         label="Nume"
                     ></v-text-field>
                   </v-col>
-                  <v-col
-                      cols="12"
-                      sm="12"
-                      md="12"
-                  >
+                  <v-col cols="12" sm="12" md="12">
                     <v-textarea
                         v-model="editedItem.description"
                         rows="3"
                         label="Descriere"
                     ></v-textarea>
                   </v-col>
-                  <v-col
-                      cols="12"
-                      sm="6"
-                      md="4"
-                  >
+                  <v-col cols="12" sm="6" md="4">
                     <v-menu
                         ref="dateMenu"
                         v-model="dateMenu"
@@ -83,28 +63,17 @@
                             v-on="on"
                         ></v-text-field>
                       </template>
-                      <v-date-picker v-model="editedItem.date" no-title scrollable >
-                        <v-spacer></v-spacer>
-                        <v-btn color="primary" @click="dateMenu = false">Cancel</v-btn>
-                        <v-btn color="primary" @click="$refs.dateMenu.save(editedItem.date)">OK</v-btn>
+                      <v-date-picker v-model="editedItem.date" no-title scrollable @input="$refs.dateMenu.save(editedItem.date)">
                       </v-date-picker>
                     </v-menu>
                   </v-col>
-                  <v-col
-                      cols="12"
-                      sm="6"
-                      md="4"
-                  >
+                  <v-col cols="12" sm="6" md="4">
                     <v-text-field
                         v-model="editedItem.location"
                         label="Locatie"
                     ></v-text-field>
                   </v-col>
-                  <v-col
-                      cols="12"
-                      sm="6"
-                      md="4"
-                  >
+                  <v-col cols="12" sm="6" md="4">
                     <v-select
                         :items="categories"
                         item-text="name"
@@ -112,9 +81,7 @@
                         v-model="editedItem.category"
                         label="Categoria"
                     ></v-select>
-
                   </v-col>
-
                 </v-row>
                 <v-row>
                   <v-col>
@@ -124,7 +91,6 @@
                         can-delete
                         class="width_full"
                         previewClass="xs8"
-
                         accept="image/*"
                         :rules="imageRules"
                         color="accent"
@@ -134,21 +100,12 @@
                 </v-row>
               </v-container>
             </v-card-text>
-
             <v-card-actions>
               <v-spacer></v-spacer>
-              <v-btn
-                  color="blue darken-1"
-                  text
-                  @click="close"
-              >
+              <v-btn color="blue darken-1" text @click="close">
                 Cancel
               </v-btn>
-              <v-btn
-                  color="blue darken-1"
-                  text
-                  @click="save"
-              >
+              <v-btn color="blue darken-1" text @click="save">
                 Save
               </v-btn>
             </v-card-actions>
@@ -176,20 +133,12 @@
       >
         mdi-pencil
       </v-icon>
-      <v-icon
-          small
-          color="red"
-
-          @click="deleteItem(item)"
-      >
+      <v-icon small color="red" @click="deleteItem(item)">
         mdi-delete
       </v-icon>
     </template>
     <template v-slot:no-data>
-      <v-btn
-          color="primary"
-          @click="initialize"
-      >
+      <v-btn color="primary" @click="initialize">
         Reset
       </v-btn>
     </template>
@@ -197,11 +146,11 @@
 </template>
 
 <script>
-import {db, storage} from '../firebase'
-import {ref, uploadBytes} from 'firebase/storage'
-import {doc, query, where, collection, getDocs, getDoc} from "firebase/firestore";
+import {storage} from '../firebase'
+import {ref, uploadBytes, getDownloadURL, uploadBytesResumable} from 'firebase/storage'
 import store from "@/store";
 import * as eventService from '../services/event-service'
+import {v4 as uuidv4} from 'uuid';
 
 export default {
   name: "Admin",
@@ -235,7 +184,8 @@ export default {
       date: '',
       location: '',
       category: '',
-      id: ''
+      id: '',
+      imgPath: '',
     },
     defaultItem: {
       name: '',
@@ -243,7 +193,8 @@ export default {
       date: '',
       location: '',
       category: '',
-      id: ''
+      id: '',
+      imgPath: '',
     },
   }),
   computed: {
@@ -258,13 +209,6 @@ export default {
     dialogDelete(val) {
       val || this.closeDelete()
     },
-    images(val) {
-      console.log('----images-----', val)
-    },
-    editedItem(val) {
-      console.log('item category')
-      console.log(val)
-    }
   },
   async created() {
     await this.initialize()
@@ -272,31 +216,10 @@ export default {
   methods: {
     async initialize() {
       this.user = store.getters.user
-      this.events = this.user.events
+      this.events = this.user.events || []
       this.categories = await eventService.getAllCategories()
-      console.log('this.categories')
+      console.log('----EVENTS-----')
       console.log(this.events)
-      /* const docRef = doc(db, "User", 'PiorIKUd1c1j0eTvQ8og');
-       const docSnap = await getDoc(docRef);
-       console.log(docSnap.data())
-       const q = query(collection(db, "Event"), where("organizer", "==", docRef));
-       // const q = query(collection(db, "Event"), where("location", "==", 'Viena'));
-
-       const querySnapshot = await getDocs(q);
-       console.log (querySnapshot)
-       querySnapshot.forEach((doc) => {
-         console.log(doc.id, " => ", doc.data());
-         this.events.push(doc.data())
-         console.log(this.events)
-         // doc.data() is never undefined for query doc snapshots
-         console.log(doc.id, " => ", doc.data());
-       });
-       console.log(this.events)*/
-      // const collRef = collection(db, "Event")
-      // const docs = await getDocs(collRef)
-      // docs.forEach((doc) => {
-      //   console.log(doc.data());
-      // });
     },
 
     async editItem(item) {
@@ -315,11 +238,8 @@ export default {
 
     async deleteItemConfirm() {
       this.events.splice(this.editedIndex, 1)
-      console.log('----------------------this.editedItem--------------')
-      console.log(this.editedItem)
       await eventService.deleteEvent(this.editedItem.id)
       this.deletedEventId = ''
-
       this.closeDelete()
     },
 
@@ -340,35 +260,25 @@ export default {
     },
 
     async save() {
-      console.log('this.editedItem')
-      console.log(this.editedItem)
+      const imgName = "img-" + uuidv4();
+      const imageRef = ref(storage, `images/${imgName}.jpg`);
+      const uploadTask = await uploadBytes(imageRef, this.images[0].file)
+      const downloadURL = await getDownloadURL(uploadTask.ref)
+      this.editedItem.imgPath = downloadURL
       const eventRef = await eventService.createEvent(this.editedItem)
-
-
       this.editedItem.id = eventRef.id
-      console.log(this.editedItem)
       if (this.editedIndex > -1) {
         Object.assign(this.events[this.editedIndex], this.editedItem)
       } else {
         this.events.push(this.editedItem)
       }
-
-      const storageRef = ref(storage);
-      const imagesRef = ref(storage, 'images');
-// imagesRef now points to 'images'
-
-// Child references can also take paths delimited by '/'
-      const spaceRef = ref(storage, 'images/space.jpg');
-      uploadBytes(imagesRef, this.images[0].file).then((snapshot) => {
-        console.log('Uploaded a blob or file!');
-      });
       this.close()
     },
+
     processUpload(event) {
       console.log(event)
     }
   },
-
 }
 </script>
 

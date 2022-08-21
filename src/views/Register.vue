@@ -7,10 +7,17 @@
             <v-card class="elevation-12 mt-16 pa-16">
               <v-toolbar dark color="primary">
                 <v-toolbar-title>Inregistrare</v-toolbar-title>
-
               </v-toolbar>
               <v-card-text>
-                <h3 class="my-4 text-center mb-12"> Inregistreaza-te in aplicatie pentru a avea acces la evenimente</h3>
+                <h3 class="my-4 text-center mb-4"> Selecteaza rolul tau in aplicatie:</h3>
+                <div class="py-4 mx-auto mb-10 text-center px-16">
+                  <v-select
+                      :items="roles"
+                      class="pt-5 px-16 weight-600 font-10 centered-input"
+                      v-model="role"
+                      label="Rolul"
+                  ></v-select>
+                </div>
                 <div id="firebaseui-auth-container"></div>
               </v-card-text>
             </v-card>
@@ -28,6 +35,7 @@ import {
 } from "firebase/auth"
 import {auth} from '@/firebase'
 import * as firebaseui from "firebaseui";
+import * as userService from "../services/user-service.js";
 import "firebaseui/dist/firebaseui.css";
 
 export default {
@@ -35,46 +43,48 @@ export default {
   props: {
     source: String,
   },
+  data() {
+    return {
+      roles: ['Utilizator', 'Organizator'],
+      role: 'Utilizator',
+    }
+  },
   mounted() {
-    let ui = new firebaseui.auth.AuthUI(auth);
+    let ui = firebaseui.auth.AuthUI.getInstance();
+    if (!ui) {
+      ui = new firebaseui.auth.AuthUI(auth);
+    }
     ui.start('#firebaseui-auth-container', {
-      signInSuccessUrl: "/events",
       signInOptions: [
         EmailAuthProvider.PROVIDER_ID,
         GoogleAuthProvider.PROVIDER_ID,
       ],
       callbacks: {
-        signInSuccessWithAuthResult: (a, e) => {
-          console.log(a, e)
-          // updateProfile(auth.currentUser, {profile: {role: "admin"}}).then((d) => console.log(d));
+        signInSuccessWithAuthResult: (userInfo) => {
+          console.log(userInfo)
+          if (userInfo.additionalUserInfo.isNewUser) {
+            let user = {};
+            user.role = this.role
+            user.email = userInfo.user.email
+            user.name = userInfo.user.displayName
+            user.uid = userInfo.user.uid
+            userService.createUser(user).then(userRef => {
+              userService.setLoggedInUser(userRef)
+              this.$router.push({name: 'About'})
+
+            })
+          } else {
+            userService.getUser(userInfo.user.uid).then(userRef => {
+              userService.setLoggedInUser(userRef)
+              this.$router.push({name: 'About'})
+            })
+          }
         }
       }
     });
-/*    let currentUid
-    console.log(auth.currentUser)
-    auth.onAuthStateChanged(function (user) {
-      // onAuthStateChanged listener triggers every time the user ID token changes.
-      // This could happen when a new user signs in or signs out.
-      // It could also happen when the current user ID token expires and is refreshed.
-      if (user && user.uid != currentUid) {
-        // Update the UI when a new user signs in.
-        // Otherwise ignore if this is a token refresh.
-        // Update the current user UID.
-        currentUid = user.uid;
-        console.log(currentUid)
-        console.log(user)
-        //this.updateProfile(auth.currentUser, {profile: {role: "admin"}}).then((d) => console.log(d));
-        // document.body.innerHTML = '<h1> Congrats ' + user.displayName + ', you are done! </h1> <h2> Now get back to what you love building. </h2> <h2> Need to verify your email address or reset your password? Firebase can handle all of that for you using the email you provided: ' + user.email + '. <h/2>';
-      } else {
-        // Sign out operation. Reset the current user UID.
-        currentUid = null;
-        console.log("no user signed in");
-      }
-    });*/
   }
 }
 </script>
 
 <style scoped>
-
 </style>
