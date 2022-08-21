@@ -1,9 +1,11 @@
 import {auth, db} from '../firebase'
 import {doc, query, where, collection, getDocs, getDoc, Timestamp, setDoc, deleteDoc, addDoc} from "firebase/firestore";
 import store from "@/store";
+import {transformDate, getData} from "@/utils/utils";
 
 export async function createEvent(event) {
     console.log('in create')
+    console.log('in create', event)
     console.log((await getDoc(doc(db, "Category", event.category.id))).data())
     const user = store.getters.user
     console.log(user)
@@ -16,7 +18,8 @@ export async function createEvent(event) {
         description: event.description,
         location: event.location,
         name: event.name,
-        organizer: doc(db, "User", store.getters.user.id)
+        organizer: doc(db, "User", store.getters.user.id),
+        imgPath: event.imgPath
     };
     console.log('CREATEEVENT', docData)
 
@@ -25,12 +28,14 @@ export async function createEvent(event) {
     return docRef
 }
 
-
 export async function deleteEvent(eventId) {
     await deleteDoc(doc(db, "Event", eventId));
 }
 
 export async function getEventsBy(location, category, date) {
+    console.log(date)
+    console.log(category)
+
     const filterDate1 = new Date(date)
     console.log(filterDate1)
     const filterDate2 = new Date(date)
@@ -40,7 +45,7 @@ export async function getEventsBy(location, category, date) {
     console.log(timestamp1)
     const timestamp2 = Timestamp.fromDate(filterDate2);
     console.log(timestamp2)
-    const categoryRef = doc(db, "Category", category);
+    const categoryRef = doc(db, "Category", category.id);
     const q = query(collection(db, "Event"),
         where("location", "==", location),
         where("category", "==", categoryRef),
@@ -49,13 +54,7 @@ export async function getEventsBy(location, category, date) {
 
     const querySnapshot = await getDocs(q);
     console.log('GETEVENTSBY', querySnapshot)
-    let events = []
-    querySnapshot.forEach((doc) => {
-        console.log(doc.id, " => ", doc.data());
-        events.push(doc.data())
-
-
-    });
+    let events = getEvents(querySnapshot)
     console.log('EVENTS', events)
     return events
 }
@@ -70,6 +69,27 @@ export async function getAllCategories() {
     });
     console.log(categories)
     return categories
+}
+
+export async function getAllEvents() {
+    const q = query(collection(db, "Event"))
+    const querySnapshot = await getDocs(q);
+    let events = getEvents(querySnapshot)
+    return events
+}
+
+function getEvents(querySnapshot){
+    let events = [];
+    querySnapshot.forEach(async (doc) => {
+        console.log(doc.id, "****** => ", doc.data());
+        const data = doc.data()
+        let category = await getData(data.category)
+        data.date = transformDate(data.date)
+        data.category = {name: category.name, id: category.id}
+        events.push({...data, id: doc.id})
+    });
+    console.log(events)
+    return events
 }
 
 export async function createCategory(category) {

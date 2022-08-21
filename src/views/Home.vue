@@ -3,7 +3,6 @@
     <heroHomeVue/>
     <div class="bg-1">
       <specialsHomeVue/>
-
     </div>
   </div>
 </template>
@@ -11,15 +10,8 @@
 <script>
 import heroHomeVue from '../components/Home/hero.home.vue'
 import specialsHomeVue from '../components/Home/specials.home.vue'
-import { db} from '../firebase'
-import { doc, getDoc, collection, getDocs } from "firebase/firestore";
-import {getEventsBy} from '../services/event-service'
-import {createEvent} from '../services/event-service'
-import {deleteEvent} from '../services/event-service'
-import {getAllCategories} from '../services/event-service'
-import {createCategory} from '../services/event-service'
-import {deleteCategory} from '../services/event-service'
-import {addFavoriteEvent} from '../services/user-service'
+import {db} from '../firebase'
+import {doc, getDoc, collection, getDocs} from "firebase/firestore";
 
 export default {
   name: 'Home',
@@ -28,63 +20,62 @@ export default {
     heroHomeVue,
     specialsHomeVue
   },
-  data(){
-    return {
-      eventsData: []
-    }
-  },
-  async mounted() {
+  // data(){
+  //   return {
+  //     eventsData: []
+  //   }
+  // },
+  // async mounted() {
+  //   const docRef = doc(db, "Event", 'GFxK5JWW9nXP2g7MGSBy');
+  //   const docSnap = await getDoc(docRef);
+  //   console.log(docSnap.data())
+  //   const collRef = collection(db, "Event")
+  //   const docs = await getDocs(collRef)
+  //   docs.forEach((doc) => {
+  //     console.log(doc.data());
+  //   });
+  // db.collection("Event")
+  //     .get()
+  //     .then((querySnapshot) => {
+  //       querySnapshot.forEach((doc) => {
+  //         console.log("data", doc)
+  //         console.log("data", doc.data())
+  //         this.eventsData.push(doc.data);
+  //         console.log(doc.id, " => ", doc.data());
+  //       });
+  //     })
+  //     .catch((error) => {
+  //       console.log("Error getting documents: ", error);
+  //     });
 
-    const docRef = doc(db, "Event", 'GFxK5JWW9nXP2g7MGSBy');
-    const docSnap = await getDoc(docRef);
-    console.log(docSnap.data())
-    const collRef = collection(db, "Event")
-    const docs = await getDocs(collRef)
-    docs.forEach((doc) => {
-      console.log(doc.data());
-    });
-    // db.collection("Event")
-    //     .get()
-    //     .then((querySnapshot) => {
-    //       querySnapshot.forEach((doc) => {
-    //         console.log("data", doc)
-    //         console.log("data", doc.data())
-    //         this.eventsData.push(doc.data);
-    //         console.log(doc.id, " => ", doc.data());
-    //       });
-    //     })
-    //     .catch((error) => {
-    //       console.log("Error getting documents: ", error);
-    //     });
+  //getEventsBy('Cluj-Napoca','cb8x41sHADYBWWCxztK0','2022-08-16' )
 
-    //getEventsBy('Cluj-Napoca','cb8x41sHADYBWWCxztK0','2022-08-16' )
+  // const event ={
+  //   category: {
+  //     id: 'cb8x41sHADYBWWCxztK0',
+  //     name: 'Arta'
+  //   },
+  //   date: '2022-08-16',
+  //   description: 'asdasdass',
+  //   location: 'Cluj-Napoca',
+  //   name: 'nebunie'
+  // }
+  //
+  // createEvent(event)
 
-    // const event ={
-    //   category: {
-    //     id: 'cb8x41sHADYBWWCxztK0',
-    //     name: 'Arta'
-    //   },
-    //   date: '2022-08-16',
-    //   description: 'asdasdass',
-    //   location: 'Cluj-Napoca',
-    //   name: 'nebunie'
-    // }
-    //
-    // createEvent(event)
+  //deleteEvent('assd')
 
-    //deleteEvent('assd')
+  //getAllCategories()
 
-    //getAllCategories()
+  //addFavoriteEvent('dnaAsMggpnICXMQaFLft')
 
-    //addFavoriteEvent('dnaAsMggpnICXMQaFLft')
+  // const category ={
+  //   name: 'nebunii'
+  // }
+  // createCategory(category)
 
-    // const category ={
-    //   name: 'nebunii'
-    // }
-    // createCategory(category)
-
-    //deleteCategory('XQAAPmkKkuYTvz1W9CFz')
-  }
+  //deleteCategory('XQAAPmkKkuYTvz1W9CFz')
+  // }
 }
 </script>
 <style>

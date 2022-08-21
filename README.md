@@ -123,3 +123,8 @@ send me a mail to papabackend@gmail.com so i can add to the sponsors list. Thank
 * [ ]  user auth token on session (web storage with vuex or leverage only from firebase)
 * [ ]  store event images on firebase storage
 * [ ]  user profile photo
+
+Left todo:
+
+* [ ]  Adauga evenimentele/favEv la user state vuex
+* [ ]  Adauga heart favorite to ev
