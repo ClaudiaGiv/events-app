@@ -1,17 +1,20 @@
-import {auth, db} from '../firebase'
-import {doc, query, where, collection, getDocs, getDoc, Timestamp, setDoc, deleteDoc, addDoc} from "firebase/firestore";
+import {db} from '../firebase'
+import {
+    doc,
+    query,
+    where,
+    collection,
+    getDocs,
+    Timestamp,
+    deleteDoc,
+    addDoc,
+    updateDoc, arrayUnion, arrayRemove
+} from "firebase/firestore";
 import store from "@/store";
 import {transformDate, getData} from "@/utils/utils";
 
 export async function createEvent(event) {
-    console.log('in create')
     console.log('in create', event)
-    console.log((await getDoc(doc(db, "Category", event.category.id))).data())
-    const user = store.getters.user
-    console.log(user)
-    console.log(user.id)
-    console.log((await getDoc(doc(db, "User", user.id))).data())
-
     const docData = {
         category: doc(db, "Category", event.category.id),
         date: Timestamp.fromDate(new Date(event.date)),
@@ -21,30 +24,52 @@ export async function createEvent(event) {
         organizer: doc(db, "User", store.getters.user.id),
         imgPath: event.imgPath
     };
-    console.log('CREATEEVENT', docData)
+    const eventRef = await addDoc(collection(db, "Event"), docData)
+    const userRef = doc(db, "User", store.getters.user.id);
+    await updateDoc(userRef, {
+        events: arrayUnion(eventRef)
+    });
+    const eventData = await getData(eventRef)
+    eventData.id = eventRef.id
+    store.commit("ADD_EVENT", eventData)
+    return eventData
+}
 
-    const docRef = await addDoc(collection(db, "Event"), docData)
-    console.log(docRef)
-    return docRef
+export async function addFavoriteEvent(event) {
+    const eventRef = doc(db, "Event", event.id);
+    const userRef = doc(db, "User", store.getters.user.id);
+    await updateDoc(userRef, {
+        favoriteEvents: arrayUnion(eventRef)
+    });
+    store.commit("ADD_FAV_EVENT", event)
+}
+
+export async function removeFavoriteEvent(eventId) {
+    const eventRef = doc(db, "Event", eventId);
+    const userRef = doc(db, "User", store.getters.user.id);
+    await updateDoc(userRef, {
+        favoriteEvents: arrayRemove(eventRef)
+    });
+    store.commit("REMOVE_FAV_EVENT", eventId)
 }
 
 export async function deleteEvent(eventId) {
-    await deleteDoc(doc(db, "Event", eventId));
+    const eventRef = doc(db, "Event", eventId);
+    const userRef = doc(db, "User", store.getters.user.id);
+    await deleteDoc(eventRef);
+    await updateDoc(userRef, {
+        events: arrayRemove(eventRef)
+    });
+    store.commit("REMOVE_EVENT", eventId)
 }
 
 export async function getEventsBy(location, category, date) {
-    console.log(date)
-    console.log(category)
-
     const filterDate1 = new Date(date)
-    console.log(filterDate1)
     const filterDate2 = new Date(date)
     filterDate2.setDate(filterDate2.getDate() + 1)
-    console.log(filterDate2)
     const timestamp1 = Timestamp.fromDate(filterDate1);
-    console.log(timestamp1)
     const timestamp2 = Timestamp.fromDate(filterDate2);
-    console.log(timestamp2)
+
     const categoryRef = doc(db, "Category", category.id);
     const q = query(collection(db, "Event"),
         where("location", "==", location),
@@ -53,9 +78,54 @@ export async function getEventsBy(location, category, date) {
         where("date", "<=", timestamp2));
 
     const querySnapshot = await getDocs(q);
-    console.log('GETEVENTSBY', querySnapshot)
-    let events = getEvents(querySnapshot)
+    let events = []
+    if (store.getters.user.role === "Utilizator") {
+        events = getEventsForUser(querySnapshot)
+    } else {
+        events = getEvents(querySnapshot)
+    }
     console.log('EVENTS', events)
+    return events
+}
+
+export async function getAllEvents() {
+    const q = query(collection(db, "Event"))
+    const querySnapshot = await getDocs(q);
+    let events = []
+    if (store.getters.user.role === "Utilizator") {
+        events = getEventsForUser(querySnapshot)
+    } else {
+        events = getEvents(querySnapshot)
+    }
+    return events
+}
+
+function getEvents(querySnapshot) {
+    let events = [];
+    querySnapshot.forEach(async (doc) => {
+        const data = doc.data()
+        let category = await getData(data.category)
+        data.date = transformDate(data.date)
+        data.category = {name: category.name, id: category.id}
+        events.push({...data, id: doc.id})
+    });
+    return events
+}
+
+function getEventsForUser(querySnapshot) {
+    let events = [];
+    querySnapshot.forEach(async (doc) => {
+        const data = doc.data()
+        let category = await getData(data.category)
+        data.date = transformDate(data.date)
+        data.category = {name: category.name, id: category.id}
+        data.id = doc.id
+        data.isFavorite = false;
+        if (store.getters.user.favoriteEvents.some(fe => fe.id === data.id)) {
+            data.isFavorite = true;
+        }
+        events.push(data)
+    });
     return events
 }
 
@@ -64,43 +134,16 @@ export async function getAllCategories() {
     const querySnapshot = await getDocs(q);
     let categories = []
     querySnapshot.forEach((doc) => {
-        console.log(doc.id, " => ", doc.data());
         categories.push({...doc.data(), id: doc.id})
     });
-    console.log(categories)
     return categories
 }
 
-export async function getAllEvents() {
-    const q = query(collection(db, "Event"))
-    const querySnapshot = await getDocs(q);
-    let events = getEvents(querySnapshot)
-    return events
-}
-
-function getEvents(querySnapshot){
-    let events = [];
-    querySnapshot.forEach(async (doc) => {
-        console.log(doc.id, "****** => ", doc.data());
-        const data = doc.data()
-        let category = await getData(data.category)
-        data.date = transformDate(data.date)
-        data.category = {name: category.name, id: category.id}
-        events.push({...data, id: doc.id})
-    });
-    console.log(events)
-    return events
-}
-
 export async function createCategory(category) {
-
     const docData = {
         name: category.name
     }
-    console.log('CREATCATEGORY', docData)
-
     const docRef = await addDoc(collection(db, "Category"), docData)
-    console.log(docRef)
     return docRef
 }
 

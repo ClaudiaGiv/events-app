@@ -6,9 +6,6 @@ import {
     where,
     collection,
     getDocs,
-    doc,
-    arrayUnion,
-    updateDoc,
     addDoc
 } from "firebase/firestore";
 
@@ -18,14 +15,13 @@ export async function getUser(uid) {
     const q = query(collection(db, "User"), where("uid", "==", uid));
     const querySnapshot = await getDocs(q);
     querySnapshot.forEach((doc) => {
-        console.log(doc.id, " => ", doc.data());
         user = {...doc.data(), id: doc.id}
     })
     console.log("user events-----")
     if (user.events?.length > 0) {
         user.events = await Promise.all(user.events.map(async (e) => {
             let ev = await getData(e)
-            console.log(ev)
+            // console.log(ev)
             if (ev) {
                 let category = await getData(ev.category)
                 // let date = (new Date(ev.date.seconds * 1000)).toLocaleDateString("en-GB", options)
@@ -35,9 +31,9 @@ export async function getUser(uid) {
         }))
     }
     if (user.favoriteEvents?.length > 0) {
-        user.events = await Promise.all(user.favoriteEvents.map(async (e) => {
+        user.favoriteEvents = await Promise.all(user.favoriteEvents.map(async (e) => {
             let ev = await getData(e)
-            console.log(ev)
+            // console.log(ev)
             if (ev) {
                 let category = await getData(ev.category)
                 let date = transformDate(ev.date)
@@ -53,13 +49,6 @@ export function setLoggedInUser(user) {
     store.commit("SET_USER", user);
 }
 
-export async function addFavoriteEvent(eventId) {
-    const user = store.getters.user
-    const userRef = doc(db, "User", user.id);
-    await updateDoc(userRef, {
-        favoriteEvents: arrayUnion(eventId)
-    });
-}
 
 export async function createUser(user) {
     const docData = {

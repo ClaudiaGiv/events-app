@@ -7,3 +7,4 @@ export function transformDate(date){
 export async function getData(doc) {
     return (await getDoc(doc)).data()
 }
+

@@ -19,7 +19,7 @@
           >
           <p class="mb-n1 ml-3 font-7 grey--text">{{ eventInfo.name }}</p>
           <v-spacer></v-spacer>
-          <v-btn icon color="pink">
+          <v-btn icon color="pink" v-if="eventInfo.isFavorite !== undefined" @click="markFavorite">
             <v-icon v-if="eventInfo.isFavorite">mdi-heart</v-icon>
             <v-icon v-else>mdi-heart-outline</v-icon>
           </v-btn>
@@ -31,6 +31,7 @@
 
 <script>
 import router from "@/router";
+import {addFavoriteEvent, removeFavoriteEvent} from "../../../services/event-service";
 
 export default {
   props: {
@@ -44,14 +45,23 @@ export default {
           eventInfo: this.eventInfo
         }
       })
+    },
+    async markFavorite() {
+      if (!this.eventInfo.isFavorite) {
+        await addFavoriteEvent(this.eventInfo)
+        this.eventInfo.isFavorite = true
+      } else {
+        await removeFavoriteEvent(this.eventInfo.id)
+        this.eventInfo.isFavorite = false
+      }
     }
   }
 };
 </script>
 
 <style>
-.hover-pointer{
-  cursor:pointer;
+.hover-pointer {
+  cursor: pointer;
 }
 .card {
   /*height: 70vh;*/

@@ -38,7 +38,7 @@ export default {
       console.log('----EVENTS-----')
       console.log(this.events)
     },
-    async searchEvents(event){
+    async searchEvents(event) {
       this.events = await eventService.getEventsBy(event.location, event.category, event.date)
     }
   },
