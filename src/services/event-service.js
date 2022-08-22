@@ -8,13 +8,28 @@ import {
     Timestamp,
     deleteDoc,
     addDoc,
-    updateDoc, arrayUnion, arrayRemove
+    updateDoc, arrayUnion, arrayRemove, getDoc
 } from "firebase/firestore";
 import store from "@/store";
 import {transformDate, getData} from "@/utils/utils";
 
+export async function extractEventObject(doc) {
+    let evData = await getDoc(doc)
+    console.log("CREATEEEEE=====",evData)
+    console.log("CREATEEEEE====",evData.category)
+
+    let category = await getData(evData.category)
+    let organizer = await getData(evData.organizer)
+    evData = evData.data()
+    evData.date = transformDate(evData.date)
+    evData.category = {name: category.name, id: category.id}
+    evData.organizer = {name: organizer.name, id: evData.organizer.id}
+    return evData
+}
+
+
 export async function createEvent(event) {
-    console.log('in create', event)
+    console.log("SAVE111111111", event)
     const docData = {
         category: doc(db, "Category", event.category.id),
         date: Timestamp.fromDate(new Date(event.date)),
@@ -24,14 +39,18 @@ export async function createEvent(event) {
         organizer: doc(db, "User", store.getters.user.id),
         imgPath: event.imgPath
     };
+    console.log("SAVE111111111", event)
     const eventRef = await addDoc(collection(db, "Event"), docData)
+    // let eventData = await getData(eventRef)
     const userRef = doc(db, "User", store.getters.user.id);
     await updateDoc(userRef, {
         events: arrayUnion(eventRef)
     });
-    const eventData = await getData(eventRef)
+
+   let eventData = await extractEventObject(eventRef)
     eventData.id = eventRef.id
-    store.commit("ADD_EVENT", eventData)
+    console.log("CREATEEEEE",eventRef)
+    console.log("CREATEEEEE", eventData)
     return eventData
 }
 
@@ -112,6 +131,7 @@ function getEvents(querySnapshot) {
     return events
 }
 
+
 function getEventsForUser(querySnapshot) {
     let events = [];
     querySnapshot.forEach(async (doc) => {
@@ -128,6 +148,7 @@ function getEventsForUser(querySnapshot) {
     });
     return events
 }
+
 
 export async function getAllCategories() {
     const q = query(collection(db, "Category"))

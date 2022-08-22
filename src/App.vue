@@ -96,6 +96,9 @@ export default {
       }
     });
   },
+  // beforeCreate() {
+  //   this.$store.commit('INIT');
+  // },
   methods: {
     logout() {
       this.$store.commit('SET_USER', {})

@@ -223,9 +223,11 @@ export default {
     },
 
     async editItem(item) {
+      console.log("SAVE", item)
       this.editedIndex = this.events.indexOf(item)
+      console.log("SAVE", this.editedIndex)
+
       this.editedItem = Object.assign({}, item)
-      await eventService.createEvent(this.editedItem)
       this.dialog = true
     },
 
@@ -265,13 +267,17 @@ export default {
       const uploadTask = await uploadBytes(imageRef, this.images[0].file)
       const downloadURL = await getDownloadURL(uploadTask.ref)
       this.editedItem.imgPath = downloadURL
-      const eventRef = await eventService.createEvent(this.editedItem)
-      this.editedItem.id = eventRef.id
+      console.log("SAVE", this.editedItem)
+      const eventData = await eventService.createEvent(this.editedItem)
+      console.log("SAVE", eventData)
+      this.editedItem.id = eventData.id
       if (this.editedIndex > -1) {
         Object.assign(this.events[this.editedIndex], this.editedItem)
       } else {
         this.events.push(this.editedItem)
+
       }
+      store.commit("ADD_EVENT", eventData)
       this.close()
     },
 

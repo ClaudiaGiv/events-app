@@ -9,6 +9,10 @@ import store from "./store";
 Vue.use(VuetifyUpload);
 Vue.config.productionTip = false
 
+store.subscribe( (mutation, state) => {
+    localStorage.setItem('user', JSON.stringify(state.user));
+})
+
 new Vue({
     router,
     store,

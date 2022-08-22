@@ -49,6 +49,12 @@ export default {
       role: 'Utilizator',
     }
   },
+  watch: {
+    role(val){
+      console.log('this.role-----')
+      console.log(val)
+    }
+  },
   mounted() {
     let ui = firebaseui.auth.AuthUI.getInstance();
     if (!ui) {
@@ -64,6 +70,8 @@ export default {
           console.log(userInfo)
           if (userInfo.additionalUserInfo.isNewUser) {
             let user = {};
+            console.log('this.role')
+            console.log(this.role)
             user.role = this.role
             user.email = userInfo.user.email
             user.name = userInfo.user.displayName

@@ -24,9 +24,13 @@ export async function getUser(uid) {
             // console.log(ev)
             if (ev) {
                 let category = await getData(ev.category)
+                console.log("category------", category)
+                console.log("category------", ev.category)
+                let organizer = await getData(ev.organizer)
                 // let date = (new Date(ev.date.seconds * 1000)).toLocaleDateString("en-GB", options)
                 let date = transformDate(ev.date)
-                return {...ev, category: {name: category.name, id: ev.category.id}, date, id: e.id}
+                return {...ev, category: {name: category.name, id: ev.category.id},
+                    date, id: e.id, organizer: {name: organizer.name, id: ev.organizer.id}}
             }
         }))
     }
@@ -35,14 +39,16 @@ export async function getUser(uid) {
             let ev = await getData(e)
             // console.log(ev)
             if (ev) {
+                let organizer = await getData(ev.organizer)
                 let category = await getData(ev.category)
                 let date = transformDate(ev.date)
-                return {...ev, category: {name: category.name, id: ev.category.id}, date, id: e.id}
+                return {...ev, category: {name: category.name, id: ev.category.id}, date, id: e.id, organizer: {name: organizer.name, id: ev.organizer.id}}
             }
         }))
     }
     return user;
 }
+
 
 export function setLoggedInUser(user) {
     console.log('authUser', user)
