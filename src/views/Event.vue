@@ -23,6 +23,11 @@
         <v-chip color="green chip lighten-5" class="pl-5 pr-5" x-large
         ><span class="font-16 weight-500 green--text">{{ eventInfo.date }}</span></v-chip>
       </v-col>
+
+      <v-col no-gutters md="auto">
+        <v-chip color="orange chip lighten-5" class="pl-5 pr-5" x-large
+        ><span class="font-16 weight-500 orange--text">{{ eventInfo.organizer.name }}</span></v-chip>
+      </v-col>
     </v-row>
     <v-row >
       <v-col cols="8" class="mx-auto mt-14">

@@ -8,9 +8,10 @@
         dark
         flat
     >
-      <div class="d-flex align-center">
+      <div class="d-flex align-center mt-6 mb-4">
         <router-link to="/">
-          <p class="font-2 mb-n1" :style="`color:${colo}`">Home</p>
+<!--          <p class="font-2 mb-n1" :style="`color:${colo}`">Home</p>-->
+          <v-img width="230" height="70"  eager src="./assets/images/obviam.png"></v-img>
         </router-link>
       </div>
       <v-spacer></v-spacer>

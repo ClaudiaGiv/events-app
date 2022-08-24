@@ -14,22 +14,22 @@ import store from "@/store";
 import {transformDate, getData} from "@/utils/utils";
 
 export async function extractEventObject(doc) {
-    let evData = await getDoc(doc)
-    console.log("CREATEEEEE=====",evData)
-    console.log("CREATEEEEE====",evData.category)
+    let evData = await getData(doc)
 
+    console.log('ev ref', evData)
     let category = await getData(evData.category)
     let organizer = await getData(evData.organizer)
-    evData = evData.data()
+    console.log('ev category', category)
+    console.log('ev organizer', organizer)
+    console.log('ev ', evData)
     evData.date = transformDate(evData.date)
-    evData.category = {name: category.name, id: category.id}
+    evData.category = {name: category.name, id: evData.category.id}
     evData.organizer = {name: organizer.name, id: evData.organizer.id}
     return evData
 }
 
-
-export async function createEvent(event) {
-    console.log("SAVE111111111", event)
+export async function updateEvent(event) {
+    console.log("update", event)
     const docData = {
         category: doc(db, "Category", event.category.id),
         date: Timestamp.fromDate(new Date(event.date)),
@@ -37,16 +37,33 @@ export async function createEvent(event) {
         location: event.location,
         name: event.name,
         organizer: doc(db, "User", store.getters.user.id),
-        imgPath: event.imgPath
+        imgPath: event.imgPath,
     };
-    console.log("SAVE111111111", event)
+    const eventRef = doc(db, "Event", event.id);
+
+// Set the "capital" field of the city 'DC'
+    await updateDoc(eventRef, docData);
+}
+
+export async function createEvent(event) {
+    console.log("update", event)
+    const docData = {
+        category: doc(db, "Category", event.category.id),
+        date: Timestamp.fromDate(new Date(event.date)),
+        description: event.description,
+        location: event.location,
+        name: event.name,
+        organizer: doc(db, "User", store.getters.user.id),
+        imgPath: event.imgPath,
+    };
+    console.log("docData", docData)
     const eventRef = await addDoc(collection(db, "Event"), docData)
     // let eventData = await getData(eventRef)
     const userRef = doc(db, "User", store.getters.user.id);
     await updateDoc(userRef, {
         events: arrayUnion(eventRef)
     });
-
+    console.log('ref dupa adaugare', eventRef)
    let eventData = await extractEventObject(eventRef)
     eventData.id = eventRef.id
     console.log("CREATEEEEE",eventRef)
@@ -124,8 +141,10 @@ function getEvents(querySnapshot) {
     querySnapshot.forEach(async (doc) => {
         const data = doc.data()
         let category = await getData(data.category)
+        let organizer = await getData(data.organizer)
         data.date = transformDate(data.date)
         data.category = {name: category.name, id: category.id}
+        data.organizer = {name: organizer.name, id: organizer.id}
         events.push({...data, id: doc.id})
     });
     return events
@@ -137,8 +156,10 @@ function getEventsForUser(querySnapshot) {
     querySnapshot.forEach(async (doc) => {
         const data = doc.data()
         let category = await getData(data.category)
+        let organizer = await getData(data.organizer)
         data.date = transformDate(data.date)
         data.category = {name: category.name, id: category.id}
+        data.organizer = {name: organizer.name, id: organizer.id}
         data.id = doc.id
         data.isFavorite = false;
         if (store.getters.user.favoriteEvents.some(fe => fe.id === data.id)) {

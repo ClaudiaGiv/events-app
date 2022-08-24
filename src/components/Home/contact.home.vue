@@ -4,7 +4,7 @@
           <v-col cols="12" xl="6" lg="6" class="" style="position:relative">
               <p class="font-2 weight-600 d-flex d-sm-none text-center ">Travel Any Corner of The World With Us</p>
              
-              <v-img eager src="../../assets/images/contact.png"></v-img>
+              <v-img eager src="../../assets/images/cluj_main_post.jpg"></v-img>
                <div style="" class="box box-1">
                    <p class="mb-n1 font-3 blue--text weight-600 text-center">300+</p>
                    <p class="font-7 font-weight-light text-center mt-n2">DESTINATIONS</p>

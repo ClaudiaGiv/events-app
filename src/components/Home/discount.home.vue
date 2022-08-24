@@ -1,14 +1,14 @@
 <template>
   <div class="ds-container">
     <div class="bg-bg">
-      <v-img class="round-it mx-0" style="margin-left:0" eager src="../../assets/images/bottom.png">
+      <v-img class="round-it mx-0" style="margin-left:0" eager src="../../assets/images/romania.jpeg">
         <v-row style="height:100%;padding:4%; margin-left:0" align="center" justify="center" no-gutters>
           <div>
             <p style="line-height:1.1;" class="font-2 text-center weight-600 white--text">Don’t Miss The 50% Discount if
               You register Today</p>
             <v-row no-gutters>
               <v-spacer></v-spacer>
-              <v-btn style="text-transform:none;border-radius:20px" class="btn-2 bg blue--text font-7 mt-10">Register Today
+              <v-btn to="/" style="text-transform:none;border-radius:20px" class="btn-2 bg blue--text font-7 mt-10">Register Today
               </v-btn>
               <v-spacer></v-spacer>
             </v-row>

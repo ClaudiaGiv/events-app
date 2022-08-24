@@ -21,7 +21,7 @@ export async function getUser(uid) {
     if (user.events?.length > 0) {
         user.events = await Promise.all(user.events.map(async (e) => {
             let ev = await getData(e)
-            // console.log(ev)
+            console.log('verificare' ,ev)
             if (ev) {
                 let category = await getData(ev.category)
                 console.log("category------", category)

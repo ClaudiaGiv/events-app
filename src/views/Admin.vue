@@ -216,18 +216,20 @@ export default {
   methods: {
     async initialize() {
       this.user = store.getters.user
-      this.events = this.user.events || []
+      this.events = [...this.user.events ]
       this.categories = await eventService.getAllCategories()
       console.log('----EVENTS-----')
       console.log(this.events)
     },
 
     async editItem(item) {
-      console.log("SAVE", item)
+      console.log("click on edit icon item", item)
       this.editedIndex = this.events.indexOf(item)
-      console.log("SAVE", this.editedIndex)
+      console.log("click on edit icon item index", this.editedIndex)
 
       this.editedItem = Object.assign({}, item)
+
+      console.log("click on edit icon editedItem", this.editedItem)
       this.dialog = true
     },
 
@@ -262,23 +264,26 @@ export default {
     },
 
     async save() {
+      let newEvent = Object.assign({}, this.editedItem)
+      let newEventIndex= this.editedIndex
+      this.close()
       const imgName = "img-" + uuidv4();
       const imageRef = ref(storage, `images/${imgName}.jpg`);
       const uploadTask = await uploadBytes(imageRef, this.images[0].file)
       const downloadURL = await getDownloadURL(uploadTask.ref)
-      this.editedItem.imgPath = downloadURL
-      console.log("SAVE", this.editedItem)
-      const eventData = await eventService.createEvent(this.editedItem)
-      console.log("SAVE", eventData)
-      this.editedItem.id = eventData.id
-      if (this.editedIndex > -1) {
-        Object.assign(this.events[this.editedIndex], this.editedItem)
+      newEvent.imgPath = downloadURL
+      console.log("this.newEvent in save", newEvent)
+      //const eventData = await eventService.createEvent(this.editedItem)
+      //console.log("SAVE", eventData)
+      //this.editedItem.id = eventData.id
+      if (newEventIndex > -1) {
+        await eventService.updateEvent(newEvent)
+        Object.assign(this.events[newEventIndex], newEvent)
       } else {
-        this.events.push(this.editedItem)
-
+        newEvent = await eventService.createEvent(newEvent)
+        this.events.push(newEvent)
       }
-      store.commit("ADD_EVENT", eventData)
-      this.close()
+      store.commit("ADD_EVENT", newEvent)
     },
 
     processUpload(event) {

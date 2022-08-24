@@ -17,7 +17,7 @@
           <v-chip color="red chip lighten-5" class="pl-3 pr-3" small
           ><span class="font-7 red--text">{{ eventInfo.category.name }}</span></v-chip
           >
-          <p class="mb-n1 ml-3 font-7 grey--text">{{ eventInfo.name }}</p>
+          <p class="mb-1 ml-3 font-weight-bold grey--text">{{ eventInfo.organizer.name }}</p>
           <v-spacer></v-spacer>
           <v-btn icon color="pink" v-if="eventInfo.isFavorite !== undefined" @click="markFavorite">
             <v-icon v-if="eventInfo.isFavorite">mdi-heart</v-icon>

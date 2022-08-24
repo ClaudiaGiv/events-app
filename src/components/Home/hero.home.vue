@@ -28,7 +28,7 @@
 <style>
 .hero{
   height :140vh;
-  background: url('../../assets/images/hero.png');
+  background: url('../../assets/images/romania.jpeg');
   background-size: cover;
 }
 .font-title{
@@ -43,7 +43,7 @@
 @media screen and (max-width:600px) {
   .hero{
   height :120vh;
-  background: url('../../assets/images/hero.png');
+  background: url('../../assets/images/romania.jpeg');
   background-size: cover;
   padding: 5%;
 }
